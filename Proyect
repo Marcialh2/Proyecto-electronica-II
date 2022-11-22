@@ -1,0 +1,151 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h> // biblio lcd
+#include <Keypad.h>
+
+const int trigPin = 9; // transmigor
+const int echoPin = 10; // receptor
+long duracion; // declaracion de variable duracion
+int distancia; // declaración de variable distancia
+int ultimaDistancia = 0; // comparar el nuevo valor con la distancia anterior
+LiquidCrystal_I2C lcd(0x27, 20,4);
+long first = 0;
+long sens = 0;
+double total = 0;
+
+char customKey; 
+const byte ROWS = 4;
+const byte COLS = 4;
+
+char keys[ROWS][COLS] = {
+  {'1','2','3','A'}, //forma calcu
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'C','0','=','D'}
+};
+byte rowPins[ROWS] = {7,6,5,4}; // Asignamos a las filas los pinouts correspondientes
+byte colPins[COLS] = {3,2,1,0}; //Asignamos a las columnas los pinouts correspondientes
+
+//Instanciamos la clase NewKeypad
+Keypad customKeypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+
+void setup()
+{
+  // inicializar pines
+  pinMode (trigPin, OUTPUT); // lanza un onda hacia el receptor
+  pinMode (echoPin, INPUT); // recibe información del exterior
+  Serial.begin(9600); // inicializamos monitor serial
+  lcd.init(); //inicializar objeto
+  lcd.backlight(); // encender lcd
+}
+void loop () // programaión sensor HC-SRO4
+{
+  customKey = customKeypad.getKey();
+  // pulseIn lee los pulsos ya sea en valor high o valor low, se traba degde pulsos desde 10miligegudo hasta 3 min
+  digitalWrite(trigPin, LOW);//apagarelgensor
+  delayMicroseconds(2); // tiempo de duración en pagar la onda
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duracion = pulseIn(echoPin, HIGH);
+
+  // velocidad del sonido = 340m/s
+  //duracion tiempo que tarda la onda en ir y venir: dividimos entre dos por que solo nos interesa es la distancia entre el sensor y la superficie de suelo o objeto
+  
+  distancia = ((duracion/ 59);
+  altura=200-distancia;
+  imc=peso/altura^2;
+  Serial.println(distancia);
+  
+  if(distancia != ultimaDistancia) // si se encuentra un nuevo valor borramos la pantalla en lcd.clear
+  {
+    //pantalla lcd
+    lcd.clear();
+    lcd.setCursor(0, 0); //POSICIONAR INFO
+    lcd.print("ALTURA: "); //MENSAJE
+    lcd.print(distancia); //imprimir variable distancia
+    lcd.print(" cm"); //unidad de medida
+    ultimaDistancia = distancia;
+    }
+  delay(500);
+}
+//
+//#include <Keypad.h>
+//#include <LiquidCrystal.h>
+//
+//LiquidCrystal lcd(13, 12, 11, 10, 9, 8); //activando lcd con sus pines
+//
+//long first = 0;
+//long sens = 0;
+//double total = 0;
+//
+//char customKey; 
+//const byte ROWS = 4;
+//const byte COLS = 4;
+//
+//char keys[ROWS][COLS] = {
+//  {'1','2','3','A'}, //forma calcu
+//  {'4','5','6','-'},
+//  {'7','8','9','*'},
+//  {'C','0','=','/'}
+//};
+//byte rowPins[ROWS] = {7,6,5,4}; // Asignamos a las filas los pinouts correspondientes
+//byte colPins[COLS] = {3,2,1,0}; //Asignamos a las columnas los pinouts correspondientes
+//
+////Instanciamos la clase NewKeypad
+//Keypad customKeypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS); 
+//
+//void setup()
+//{
+//lcd.begin(16, 2);               // start lcd
+//lcd.setCursor(0,0);
+//  lcd.print("Ingrese su peso");
+//  lcd.setCursor(0,1);
+//delay(4000);
+//lcd.clear();
+//lcd.setCursor(0, 0);
+//}
+//
+//void loop()
+//{
+//  customKey = customKeypad.getKey();
+//  switch(customKey) 
+//  {
+//  case '0' ... '9': // Seleccionamos los valores del 0 al 9 de nuestro teclado.
+//    lcd.setCursor(0,0);
+//    first = first * 10 + (customKey - '0');
+//    lcd.print(first);
+//    break;
+//  
+//  case 'C':
+//    total = 0;
+//    lcd.clear();
+//    break;
+//   
+//  case '/':
+//    first = (total != 0 ? total : first);
+//    lcd.setCursor(0,1);
+//    lcd.print("/");
+//    sens = distancia^2(); // Obtengo el segundo numero
+//    total = first / sens;
+//    lcd.setCursor(0,3);
+//    first = 0, sens = 0; // Inicializamos los valores
+//    lcd.print(total);
+//    break;
+//  }
+//}
+//
+//long sens()
+//{
+//  while( 1 )
+//  {
+//    customKey = customKeypad.getKey();
+//    if(customKey >= '0' && customKey <= '9')
+//    {
+//      sens = sens * 10 + (customKey - '0');
+//      lcd.setCursor(0,2);
+//      lcd.print(second);
+//    }
+//    if(customKey == '=') break;  
+//  }
+// return sens; 
+//}
